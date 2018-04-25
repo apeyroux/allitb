@@ -4,12 +4,15 @@ module Main where
 
 import qualified Control.Exception as E
 import           Control.Exception as X
+import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BL
-import           Data.ByteString.Lazy.Char8 (pack)
+import qualified Data.ByteString.Lazy.Char8 as CL8
+import qualified Data.ByteString.Char8 as C8
 import           Network.HTTP.Conduit
 import           Network.HTTP.Types.Status
 import           System.Environment
 import           Text.HandsomeSoup
+import Data.Monoid
 import           Text.Regex
 import           Text.XML.HXT.Core
 
@@ -49,8 +52,15 @@ main = do
                 printdwl t
                 case urlpdf of
                   [urlpdf, _] -> simpleHttp urlpdf `E.catch` (\(HttpExceptionRequest _ ex) -> do
-                                                                 putStrLn (show ex)
-                                                                 return $ pack $ show ex) >>= BL.writeFile (t ++ ".pdf")
+                                                                 case ex of
+                                                                   StatusCodeException r _ -> do
+                                                                     C8.putStrLn $ C8.pack "[err] "
+                                                                       <> (statusMessage $ responseStatus r)
+                                                                       <> C8.pack " with book "
+                                                                       <> C8.pack t
+                                                                     return $ BL.pack $ B.unpack $ statusMessage $ responseStatus r
+                                                                   otherwise -> return $ "undefined error"
+                                                             ) >>= BL.writeFile (t ++ ".pdf")
                   otherwise -> printerr t
             ) links
     doc p s = fromUrl ("http://www.allitebooks.com/page/" ++ p ++ "/?s=" ++ s)
