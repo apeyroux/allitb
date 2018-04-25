@@ -4,15 +4,17 @@ module Main where
 
 import qualified Control.Exception as E
 import           Control.Exception as X
+import           Control.Monad.State
 import qualified Data.ByteString as B
+import qualified Data.ByteString.Char8 as C8
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.ByteString.Lazy.Char8 as CL8
-import qualified Data.ByteString.Char8 as C8
+import           Data.Monoid
 import           Network.HTTP.Conduit
 import           Network.HTTP.Types.Status
 import           System.Environment
+import           System.IO.Error
 import           Text.HandsomeSoup
-import Data.Monoid
 import           Text.Regex
 import           Text.XML.HXT.Core
 
@@ -49,7 +51,6 @@ main = do
                   >>> getChildren
                   >>> css "a"
                   >>> getAttrValue "href"
-                printdwl t
                 case urlpdf of
                   [urlpdf, _] -> simpleHttp urlpdf `E.catch` (\(HttpExceptionRequest _ ex) -> do
                                                                  case ex of
@@ -60,7 +61,12 @@ main = do
                                                                        <> C8.pack t
                                                                      return $ BL.pack $ B.unpack $ statusMessage $ responseStatus r
                                                                    otherwise -> return $ "undefined error"
-                                                             ) >>= BL.writeFile (t ++ ".pdf")
+                                                             )
+                                 >>= (\raw -> printdwl t >> return raw)
+                                 >>= (\raw -> catchIOError (BL.writeFile (t ++ ".pdf") raw) (\ioerr -> do
+                                                                                                print ioerr
+                                                                                            )
+                                     )
                   otherwise -> printerr t
             ) links
     doc p s = fromUrl ("http://www.allitebooks.com/page/" ++ p ++ "/?s=" ++ s)

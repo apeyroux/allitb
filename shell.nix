@@ -5,7 +5,7 @@ let
   inherit (nixpkgs) pkgs;
 
   f = { mkDerivation, base, bytestring, HandsomeSoup, http-conduit
-      , http-types, hxt, regex-compat, stdenv
+      , http-types, hxt, mtl, regex-compat, stdenv
       }:
       mkDerivation {
         pname = "allitbs";
@@ -14,7 +14,7 @@ let
         isLibrary = false;
         isExecutable = true;
         executableHaskellDepends = [
-          base bytestring HandsomeSoup http-conduit http-types hxt
+          base bytestring HandsomeSoup http-conduit http-types hxt mtl
           regex-compat
         ];
         homepage = "https://github.com/githubuser/allitbs#readme";
