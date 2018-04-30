@@ -1,8 +1,0 @@
-#+BEGIN_SRC sh
-$ allitb
-Usage: allitb (-q|--search ARG) (-d|--destination ARG)
-  Siphon AllitBooks
-
-Available options:
-  -h,--help                Show this help text
-#+END_SRC
