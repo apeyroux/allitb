@@ -24,3 +24,5 @@ executable allitb
                      , hxt
                      , mtl
                      , regex-compat
+                     , optparse-applicative
+                     , directory
