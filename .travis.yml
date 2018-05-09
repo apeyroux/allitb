@@ -1,2 +1,6 @@
-language: nix
-script: nix-build
+language: haskell
+ghc:
+  - "8.4"
+  - "8.2"
+  - "8.0"
+  - "7.10"
